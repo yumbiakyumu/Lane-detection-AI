@@ -35,14 +35,24 @@ def important_region(img, vertices):
     # Perform a bitwise AND operation between the image and the mask
     masked_image = cv2.bitwise_and(img, mask)
     return masked_image
+def draw_lines(image, lines):
+    image = ny.copy(image)
+    blank_image = ny.zeros((image.shape[0],image.shape[1], 3), dtype=ny.uint8)
 
+    for line in lines:
+        for x1, y1, x2, y2 in line:
+            cv2.line(blank_image, (x1,y1,), (x2,y2), (0,255, 0), thickness=3)
+
+    image = cv2.addWeighted(image, 0.8, blank_image, 1, 0.0)
+    return
 grayscale_image=cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 canny_image=cv2.Canny(grayscale_image, 100, 200)
 # Get the masked image using the 'important_region' function
 masked_image = important_region(canny_image, ny.array([important_region_vertices], ny.int32))
-
+lines = cv2.HoughLinesP(masked_image,rho=6,theta=ny.pi/60,threshold=160,lines=ny.array([]),minLineLength=40,maxLineGap=25)
 
 # Display the masked image using Matplotlib
-apl.imshow(masked_image)
+image_with_lines = draw_lines(image, lines)
+apl.imshow(image_with_lines)
 apl.show()
 
